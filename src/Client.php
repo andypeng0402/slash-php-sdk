@@ -191,7 +191,7 @@ class Client
                     throw $e;
                 }
                 
-                $statusCode = $this->httpClient->getStatusCode();
+                $statusCode = $this->httpClient->errCode;
                 
                 // 检查是否需要重试
                 if ($this->shouldRetry($statusCode, $retries)) {
