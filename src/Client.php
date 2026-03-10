@@ -172,8 +172,8 @@ class Client
                 $responseBody = $this->httpClient->getBody();
                 $statusCode = $this->httpClient->getStatusCode();
                 
-                if ($this->httpClient->getError()) {
-                    throw new Exceptions\ApiConnectionException("Connection error: " . $this->httpClient->errMsg);
+                if ($this->httpClient->errCode) {
+                    throw new Exceptions\ApiConnectionException("Connection error: " . socket_strerror($this->httpClient->errCode));
                 }
                 
                 if ($statusCode <= 0) {
