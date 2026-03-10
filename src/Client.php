@@ -3,6 +3,7 @@
 namespace SlashPhpSdk;
 
 use Swoole\Coroutine\Http\Client as SwooleClient;
+use SlashPhpSdk\Exceptions as Exceptions;
 
 /**
  * 主客户端类，提供与Slash API交互的功能
