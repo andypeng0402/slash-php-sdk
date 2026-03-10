@@ -1,0 +1,39 @@
+{
+    "name": "xiaoye0402/slash-php-sdk",
+    "description": "PHP SDK for Slash API",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Slash Team",
+            "email": "team@joinslash.com"
+        }
+    ],
+    "require": {
+        "php": "^7.4|^8.0",
+        "guzzlehttp/guzzle": "^7.0",
+        "psr/http-message": "^1.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "SlashPhpSdk\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "SlashPhpSdk\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "phpunit",
+        "test-coverage": "phpunit --coverage-html coverage/"
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}
