@@ -48,32 +48,7 @@ class SlashPhpSdk
     public function card(): Resources\BaseResource
     {
         if (!isset($this->resources['card'])) {
-            $this->resources['card'] = new class($this->client) extends Resources\BaseResource {
-                public function list(array $params = []): array
-                {
-                    return $this->get('/cards', $params);
-                }
-
-                public function retrieve(string $cardId): array
-                {
-                    return $this->get("/cards/{$cardId}");
-                }
-
-                public function create(array $data): array
-                {
-                    return $this->post('/cards', $data);
-                }
-
-                public function update(string $cardId, array $data): array
-                {
-                    return $this->put("/cards/{$cardId}", $data);
-                }
-
-                public function delete($id, array $params = []): array
-                {
-                    return parent::delete("/cards/{$id}",$params);
-                }
-            };
+            $this->resources['card'] = new Resources\CardResource($this->client);
         }
         return $this->resources['card'];
     }

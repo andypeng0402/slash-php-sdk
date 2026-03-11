@@ -46,7 +46,6 @@ class Client
             'timeout' => $config['timeout'] ?? 30,
         ]);
     }
-    
     /**
      * 获取默认请求头
      */

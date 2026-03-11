@@ -18,9 +18,9 @@ class CardResource extends BaseResource
     /**
      * 获取特定卡片信息
      */
-    public function retrieve(string $cardId): array
+    public function retrieve(string $cardId,array $params = []): array
     {
-        return $this->get("/card/{$cardId}");
+        return $this->get("/card/{$cardId}", $params);
     }
 
     /**
