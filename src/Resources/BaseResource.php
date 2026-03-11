@@ -27,9 +27,9 @@ abstract class BaseResource
     /**
      * 发送GET请求到API
      */
-    protected function get(string $endpoint, array $params = []): array
+    protected function get(string $endpoint, array $params = [] , ?string $baseUrl = null): array
     {
-        return $this->client->get($endpoint, $params);
+        return $this->client->get($endpoint, $params, $baseUrl);
     }
 
     /**

@@ -43,7 +43,7 @@ class SlashPhpSdk
     }
 
     /**
-     * 获取Card资源实例（示例）
+     * 获取Card资源实例
      */
     public function card(): Resources\BaseResource
     {
@@ -52,10 +52,6 @@ class SlashPhpSdk
         }
         return $this->resources['card'];
     }
-
-    /**
-     * 获取其他资源类的便捷方法...
-     */
 
     /**
      * 获取底层客户端

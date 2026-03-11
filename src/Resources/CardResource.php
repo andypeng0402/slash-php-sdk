@@ -18,9 +18,14 @@ class CardResource extends BaseResource
     /**
      * 获取特定卡片信息
      */
-    public function retrieve(string $cardId,array $params = []): array
+    public function retrieve(string $cardId,array $params = [] , ?string $baseUrl = null): array
     {
-        return $this->get("/card/{$cardId}", $params);
+        if(isset($params['include_pan']) || isset($params['include_cvv'])){
+            if($params['include_pan'] === true || $params['include_cvv'] === true){
+                $baseUrl = $$baseUrl ?: 'https://vault.slash.com';
+            }
+        }
+        return $this->get("/card/{$cardId}", $params , $baseUrl ?? null);
     }
 
     /**

@@ -6,7 +6,7 @@ use Swoole\Coroutine\Http\Client as SwooleClient;
 use SlashPhpSdk\Exceptions as Exceptions;
 
 /**
- * 主客户端类，提供与Slash API交互的功能
+ * 主客户端类，提供与 Slash API 交互的功能
  */
 class Client
 {
@@ -30,22 +30,51 @@ class Client
         $this->password = $config['password'] ?? $_ENV['SLASH_SDK_PASSWORD'] ?? null;
         
         $this->baseUrl = $config['base_url'] ?? $_ENV['SLASH_SDK_BASE_URL'] ?? 'https://api.joinslash.com';
-        $this->maxRetries = $config['max_retries'] ?? 2; // 默认重试次数
+        $this->maxRetries = $config['max_retries'] ?? 2;
         $this->defaultHeaders = $config['default_headers'] ?? [];
         $this->defaultQuery = $config['default_query'] ?? [];
         
-        // 解析基础URL
+        // 解析基础 URL 并初始化 HTTP 客户端
         $this->parsedUrl = parse_url($this->baseUrl);
-        $host = $this->parsedUrl['host'];
-        $port = $this->parsedUrl['port'] ?? ($this->parsedUrl['scheme'] === 'https' ? 443 : 80);
-        $ssl = $this->parsedUrl['scheme'] === 'https';
+        $this->httpClient = $this->createHttpClient($config);
+    }
+    
+    /**
+     * 创建 HTTP 客户端
+     */
+    private function createHttpClient(array $config = []): SwooleClient
+    {
+        $parsedUrl = $this->parsedUrl;
+        $host = $parsedUrl['host'];
+        $port = $parsedUrl['port'] ?? ($parsedUrl['scheme'] === 'https' ? 443 : 80);
+        $ssl = $parsedUrl['scheme'] === 'https';
         
-        // 初始化HTTP客户端
-        $this->httpClient = new SwooleClient($host, $port, $ssl);
-        $this->httpClient->set([
+        $httpClient = new SwooleClient($host, $port, $ssl);
+        $httpClient->set([
             'timeout' => $config['timeout'] ?? 30,
         ]);
+        
+        return $httpClient;
     }
+    
+    /**
+     * 根据 baseURL 创建临时的 HTTP 客户端
+     */
+    private function createHttpClientForUrl(string $baseUrl, array $config = []): SwooleClient
+    {
+        $parsedUrl = parse_url($baseUrl);
+        $host = $parsedUrl['host'];
+        $port = $parsedUrl['port'] ?? ($parsedUrl['scheme'] === 'https' ? 443 : 80);
+        $ssl = $parsedUrl['scheme'] === 'https';
+        
+        $httpClient = new SwooleClient($host, $port, $ssl);
+        $httpClient->set([
+            'timeout' => $config['timeout'] ?? 30,
+        ]);
+        
+        return $httpClient;
+    }
+    
     /**
      * 获取默认请求头
      */
@@ -57,11 +86,8 @@ class Client
             'User-Agent' => 'SlashPhpSdk/0.1.0',
         ];
         
-        // 添加认证相关的头部
         $authHeaders = $this->getAuthHeaders();
         $headers = array_merge($headers, $authHeaders);
-        
-        // 添加用户自定义的头部
         $headers = array_merge($headers, $this->defaultHeaders);
         
         return $headers;
@@ -91,55 +117,90 @@ class Client
     }
     
     /**
-     * 发送GET请求
+     * 发送 GET 请求
+     * @param string $endpoint 请求端点
+     * @param array $params 查询参数
+     * @param string|null $baseUrl 自定义基础 URL（可选）
      */
-    public function get(string $endpoint, array $params = []): array
+    public function get(string $endpoint, array $params = [], ?string $baseUrl = null): array
     {
-        return $this->request('GET', $endpoint, ['query' => array_merge($this->defaultQuery, $params)]);
+        return $this->request('GET', $endpoint, ['query' => array_merge($this->defaultQuery, $params)], $baseUrl);
     }
     
     /**
-     * 发送POST请求
+     * 发送 POST 请求
+     * @param string $endpoint 请求端点
+     * @param array $data 请求数据
+     * @param string|null $baseUrl 自定义基础 URL（可选）
      */
-    public function post(string $endpoint, array $data = []): array
+    public function post(string $endpoint, array $data = [], ?string $baseUrl = null): array
     {
-        return $this->request('POST', $endpoint, ['json' => $data]);
+        return $this->request('POST', $endpoint, ['json' => $data], $baseUrl);
     }
     
     /**
-     * 发送PUT请求
+     * 发送 PUT 请求
+     * @param string $endpoint 请求端点
+     * @param array $data 请求数据
+     * @param string|null $baseUrl 自定义基础 URL（可选）
      */
-    public function put(string $endpoint, array $data = []): array
+    public function put(string $endpoint, array $data = [], ?string $baseUrl = null): array
     {
-        return $this->request('PUT', $endpoint, ['json' => $data]);
-    }
-    /**
-     * 发送PATCH请求
-     */
-    public function patch(string $endpoint, array $data = []): array
-    {
-        return $this->request('PATCH', $endpoint, ['json' => $data]);
+        return $this->request('PUT', $endpoint, ['json' => $data], $baseUrl);
     }
     
     /**
-     * 发送DELETE请求
+     * 发送 PATCH 请求
+     * @param string $endpoint 请求端点
+     * @param array $data 请求数据
+     * @param string|null $baseUrl 自定义基础 URL（可选）
      */
-    public function delete(string $endpoint, array $params = []): array
+    public function patch(string $endpoint, array $data = [], ?string $baseUrl = null): array
     {
-        return $this->request('DELETE', $endpoint, ['query' => $params]);
+        return $this->request('PATCH', $endpoint, ['json' => $data], $baseUrl);
     }
     
     /**
-     * 执行HTTP请求
+     * 发送 DELETE 请求
+     * @param string $endpoint 请求端点
+     * @param array $params 查询参数
+     * @param string|null $baseUrl 自定义基础 URL（可选）
      */
-    private function request(string $method, string $endpoint, array $options = []): array
+    public function delete(string $endpoint, array $params = [], ?string $baseUrl = null): array
+    {
+        return $this->request('DELETE', $endpoint, ['query' => $params], $baseUrl);
+    }
+    
+    /**
+     * 执行 HTTP 请求
+     * @param string $method 请求方法
+     * @param string $endpoint 请求端点
+     * @param array $options 请求选项
+     * @param string|null $baseUrl 自定义基础 URL（可选）
+     */
+    private function request(string $method, string $endpoint, array $options = [], ?string $baseUrl = null): array
     {
         $retries = 0;
         
+        // 确定使用哪个 baseURL
+        $currentBaseUrl = $baseUrl ?? $this->baseUrl;
+        
+        // 如果使用了自定义 baseURL，需要创建临时的 HTTP 客户端
+        $useCustomClient = ($baseUrl !== null && $baseUrl !== $this->baseUrl);
+        $originalHttpClient = null;
+        
+        if ($useCustomClient) {
+            $originalHttpClient = $this->httpClient;
+            $this->httpClient = $this->createHttpClientForUrl($currentBaseUrl);
+        }
+        
+        // 解析当前 baseURL
+        $parsedUrl = parse_url($currentBaseUrl);
+        
         while (true) {
             try {
-                // 构建完整URL
-                $fullUrl = $this->baseUrl . $endpoint;
+                // 构建完整 URL
+                $fullUrl = $currentBaseUrl . $endpoint;
                 
                 // 合并查询参数
                 $query = [];
@@ -153,7 +214,7 @@ class Client
                     $fullUrl .= '?' . http_build_query($query);
                 }
                 
-                // 解析URL获取路径和查询字符串
+                // 解析 URL 获取路径和查询字符串
                 $parsedEndpoint = parse_url($fullUrl);
                 $path = $parsedEndpoint['path'] ?? '/';
                 $path .= isset($parsedEndpoint['query']) ? '?' . $parsedEndpoint['query'] : '';
@@ -168,7 +229,7 @@ class Client
                     $body = json_encode($options['json']);
                 }
                 
-                // 设置Swoole客户端
+                // 设置 Swoole 客户端
                 $this->httpClient->setMethod($method);
                 $this->httpClient->setHeaders($headers);
                 $this->httpClient->setData($body);
@@ -187,32 +248,46 @@ class Client
                     throw new Exceptions\ApiConnectionException("Request failed with status code: {$statusCode}");
                 }
                 
+                // 恢复原始 HTTP 客户端
+                if ($useCustomClient) {
+                    $this->httpClient = $originalHttpClient;
+                }
+                
                 return $this->handleResponse($statusCode, $responseBody, $responseHeaders);
                 
             } catch (\Swoole\Coroutine\Http\Client\Exception $e) {
+                // 恢复原始 HTTP 客户端
+                if ($useCustomClient) {
+                    $this->httpClient = $originalHttpClient;
+                }
                 throw new Exceptions\ApiConnectionException("Connection error: " . $e->getMessage());
             } catch (\Exception $e) {
+                // 恢复原始 HTTP 客户端
+                if ($useCustomClient) {
+                    $this->httpClient = $originalHttpClient;
+                }
+                
                 $errorType = get_class($e);
                 
                 if ($errorType === Exceptions\ApiConnectionException::class) {
                     throw $e;
                 }
                 
-                $statusCode = $this->httpClient->errCode;
+                $statusCode = $this->httpClient->errCode ?? 0;
                 
                 // 检查是否需要重试
                 if ($this->shouldRetry($statusCode, $retries)) {
                     $retries++;
                     $delay = $this->calculateRetryDelay($retries);
                     
-                    // 使用协程sleep
+                    // 使用协程 sleep
                     \Swoole\Coroutine::sleep($delay);
                     continue;
                 }
                 
                 // 根据状态码抛出适当的异常
-                $responseHeaders = $this->httpClient->getHeaders();
-                $responseBody = $this->httpClient->getBody();
+                $responseHeaders = $this->httpClient->getHeaders() ?? [];
+                $responseBody = $this->httpClient->getBody() ?? '';
                 
                 throw $this->makeStatusErrorWithRawData($statusCode, $responseBody, $responseHeaders);
             }
@@ -225,7 +300,6 @@ class Client
     private function handleResponse(int $statusCode, string $body, array $headers): array
     {
         if ($statusCode >= 400) {
-            // 模拟原始响应对象用于异常处理
             $mockResponse = (object)[
                 'getStatusCode' => function() use ($statusCode) { return $statusCode; },
                 'getBody' => function() use ($body) { return $body; }
@@ -256,7 +330,6 @@ class Client
             return false;
         }
         
-        // 需要重试的状态码：408, 409, 429, 5xx
         return $statusCode === 408 || $statusCode === 409 || $statusCode === 429 || $statusCode >= 500;
     }
     
@@ -265,12 +338,11 @@ class Client
      */
     private function calculateRetryDelay(int $attempt): float
     {
-        // 指数退避算法
-        $initialDelay = 0.5; // 初始延迟0.5秒
-        $maxDelay = 8.0; // 最大延迟8秒
+        $initialDelay = 0.5;
+        $maxDelay = 8.0;
         
-        $delay = $initialDelay * pow(2, $attempt - 1); // 2的指数增长
-        $jitter = 1 - 0.25 * mt_rand() / mt_getrandmax(); // 添加随机抖动
+        $delay = $initialDelay * pow(2, $attempt - 1);
+        $jitter = 1 - 0.25 * mt_rand() / mt_getrandmax();
         
         return min($delay * $jitter, $maxDelay);
     }
@@ -290,7 +362,6 @@ class Client
             $message .= " - " . $body;
         }
         
-        // 创建模拟响应对象
         $mockResponse = (object)[
             'getStatusCode' => function() use ($statusCode) { return $statusCode; },
             'getBody' => function() use ($body) { return $body; }
@@ -322,7 +393,7 @@ class Client
     }
     
     /**
-     * 获取API密钥
+     * 获取 API 密钥
      */
     public function getApiKey(): ?string
     {
@@ -354,7 +425,7 @@ class Client
     }
     
     /**
-     * 获取基础URL
+     * 获取基础 URL
      */
     public function getBaseUrl(): string
     {
@@ -370,7 +441,7 @@ class Client
     }
     
     /**
-     * 设置新的API密钥
+     * 设置新的 API 密钥
      */
     public function setApiKey(string $apiKey): void
     {
@@ -388,17 +459,10 @@ class Client
     }
     
     /**
-     * 刷新HTTP客户端
+     * 刷新 HTTP 客户端
      */
     private function refreshHttpClient(): void
     {
-        $host = $this->parsedUrl['host'];
-        $port = $this->parsedUrl['port'] ?? ($this->parsedUrl['scheme'] === 'https' ? 443 : 80);
-        $ssl = $this->parsedUrl['scheme'] === 'https';
-        
-        $this->httpClient = new SwooleClient($host, $port, $ssl);
-        $this->httpClient->set([
-            'timeout' => 30, // 可能需要从配置中获取
-        ]);
+        $this->httpClient = $this->createHttpClient([]);
     }
 }
