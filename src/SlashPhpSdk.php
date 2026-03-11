@@ -55,7 +55,7 @@ class SlashPhpSdk
     /**
      * 获取Card资源实例
      */
-    public function card(): Resources\BaseResource
+    public function card(): Resources\CardResource
     {
         if (!isset($this->resources['card'])) {
             $this->resources['card'] = new Resources\CardResource($this->client);
