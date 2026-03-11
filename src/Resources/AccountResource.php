@@ -12,7 +12,7 @@ class AccountResource extends BaseResource
      */
     public function list(array $params = []): array
     {
-        return $this->get('/accounts', $params);
+        return $this->get('/account', $params);
     }
 
     /**
@@ -20,7 +20,7 @@ class AccountResource extends BaseResource
      */
     public function retrieve(string $accountId): array
     {
-        return $this->get("/accounts/{$accountId}");
+        return $this->get("/account/{$accountId}");
     }
 
     /**
@@ -28,7 +28,7 @@ class AccountResource extends BaseResource
      */
     public function create(array $data): array
     {
-        return $this->post('/accounts', $data);
+        return $this->post('/account', $data);
     }
 
     /**
@@ -36,7 +36,7 @@ class AccountResource extends BaseResource
      */
     public function update(string $accountId, array $data): array
     {
-        return $this->put("/accounts/{$accountId}", $data);
+        return $this->put("/account/{$accountId}", $data);
     }
 
     /**
@@ -44,6 +44,6 @@ class AccountResource extends BaseResource
      */
     public function delete(string $accountId, array $params = []): array
     {
-        return $this->delete("/accounts/{$accountId}", $params);
+        return $this->delete("/account/{$accountId}", $params);
     }
 }
