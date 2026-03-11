@@ -38,4 +38,12 @@ class TransactionResource extends BaseResource
     {
         return $this->patch("/transaction/{$transactionId}", $data);
     }
+
+    /**
+     * 获取交易费用详情
+     */
+    public function feeDetails(string $transactionId): array
+    {
+        return $this->get("/transaction/{$transactionId}/fee-details");
+    }
 }

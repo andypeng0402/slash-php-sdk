@@ -30,6 +30,16 @@ class SlashPhpSdk
         }
         return $this->resources['account'];
     }
+    /**
+     * 获取Account资源实例
+     */
+    public function virtualAccount(): Resources\VirtualAccountResource
+    {
+        if (!isset($this->resources['virtualAccount'])) {
+            $this->resources['virtualAccount'] = new Resources\VirtualAccountResource($this->client);
+        }
+        return $this->resources['virtualAccount'];
+    }
 
     /**
      * 获取Transaction资源实例
