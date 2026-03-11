@@ -40,10 +40,10 @@ class AccountResource extends BaseResource
     }
 
     /**
-     * 删除账户
+     * 获取账户余额
      */
-    public function delete(string $accountId, array $params = []): array
+    public function balance(string $accountId): array
     {
-        return $this->delete("/account/{$accountId}", $params);
+        return $this->get("/account/{$accountId}/balance");
     }
 }
