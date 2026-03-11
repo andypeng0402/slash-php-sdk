@@ -47,6 +47,13 @@ abstract class BaseResource
     {
         return $this->client->put($endpoint, $data);
     }
+    /**
+     * 发送PATCH请求到API
+     */
+    protected function patch(string $endpoint, array $data = []): array
+    {
+        return $this->client->patch($endpoint, $data);
+    }
 
     /**
      * 发送DELETE请求到API

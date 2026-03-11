@@ -12,7 +12,15 @@ class TransactionResource extends BaseResource
      */
     public function list(array $params = []): array
     {
-        return $this->get('/transactions', $params);
+        return $this->get('/transaction', $params);
+    }
+
+    /**
+     * 获取交易聚合数据
+     */
+    public function aggregations(array $params = []): array
+    {
+        return $this->get('/transaction/aggregation', $params);
     }
 
     /**
@@ -20,15 +28,7 @@ class TransactionResource extends BaseResource
      */
     public function retrieve(string $transactionId): array
     {
-        return $this->get("/transactions/{$transactionId}");
-    }
-
-    /**
-     * 创建新交易
-     */
-    public function create(array $data): array
-    {
-        return $this->post('/transactions', $data);
+        return $this->get("/transaction/{$transactionId}");
     }
 
     /**
@@ -36,14 +36,6 @@ class TransactionResource extends BaseResource
      */
     public function update(string $transactionId, array $data): array
     {
-        return $this->put("/transactions/{$transactionId}", $data);
-    }
-
-    /**
-     * 删除交易
-     */
-    public function delete(string $transactionId , array $data = []): array
-    {
-        return $this->delete("/transactions/{$transactionId}", $data);
+        return $this->patch("/transaction/{$transactionId}", $data);
     }
 }

@@ -114,6 +114,13 @@ class Client
     {
         return $this->request('PUT', $endpoint, ['json' => $data]);
     }
+    /**
+     * 发送PATCH请求
+     */
+    public function patch(string $endpoint, array $data = []): array
+    {
+        return $this->request('PATCH', $endpoint, ['json' => $data]);
+    }
     
     /**
      * 发送DELETE请求
