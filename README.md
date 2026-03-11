@@ -24,18 +24,20 @@ $sdk = new SlashPhpSdk([
     'api_key' => 'your-api-key-here',
     'base_url' => 'https://api.joinslash.com'
 ]);
+//必须在协程中运行
+\Swoole\Coroutine\run(function () use ($sdk) {
+    // 获取账户列表
+    $accounts = $sdk->account()->list();
+    print_r($accounts);
 
-// 获取账户列表
-$accounts = $sdk->account()->list();
-print_r($accounts);
-
-// 创建新账户
-$newAccount = $sdk->account()->create([
-    'name' => 'Example Account',
-    'type' => 'checking',
-    'balance' => 1000.00
-]);
-print_r($newAccount);
+    // 创建新账户
+    $newAccount = $sdk->account()->create([
+        'name' => 'Example Account',
+        'type' => 'checking',
+        'balance' => 1000.00
+    ]);
+    print_r($newAccount);
+});
 ```
 
 ## 配置选项
@@ -59,7 +61,7 @@ SDK 提供了以下资源类：
 - `$sdk->transaction()` - 交易相关操作
 - `$sdk->card()` - 卡片相关操作
 
-每个资源类都提供了 `list`, `retrieve`, `create`, `update`, 和 `delete` 方法。
+资源类都提供 `list`, `retrieve`, `create` 等方法。
 
 ## 异常处理
 
