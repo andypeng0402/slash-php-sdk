@@ -260,6 +260,16 @@ class Client
                 if ($useCustomClient) {
                     $this->httpClient = $originalHttpClient;
                 }
+                
+                $statusCode = $this->httpClient->errCode ?? 0;
+                
+                if ($this->shouldRetry($statusCode, $retries)) {
+                    $retries++;
+                    $delay = $this->calculateRetryDelay($retries);
+                    \Swoole\Coroutine::sleep($delay);
+                    continue;
+                }
+                
                 throw new Exceptions\ApiConnectionException("Connection error: " . $e->getMessage());
             } catch (\Exception $e) {
                 // 恢复原始 HTTP 客户端
@@ -330,7 +340,21 @@ class Client
             return false;
         }
         
-        return $statusCode === 408 || $statusCode === 409 || $statusCode === 429 || $statusCode >= 500;
+        // HTTP 状态码重试条件
+        $httpRetryCodes = [408, 409, 429];
+        if (in_array($statusCode, $httpRetryCodes) || $statusCode >= 500) {
+            return true;
+        }
+        
+        // Swoole 连接错误码重试条件（临时网络问题）
+        $connectionRetryCodes = [
+            110, // 连接超时
+            111, // 连接失败
+            113, // 无路由到主机
+            114, // 操作超时
+        ];
+        
+        return in_array($statusCode, $connectionRetryCodes);
     }
     
     /**
