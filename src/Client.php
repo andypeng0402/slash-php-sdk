@@ -352,6 +352,8 @@ class Client
             111, // 连接失败
             113, // 无路由到主机
             114, // 操作超时
+            711, // SSL 握手失败
+            -1, // 未知错误
         ];
         
         return in_array($statusCode, $connectionRetryCodes);
