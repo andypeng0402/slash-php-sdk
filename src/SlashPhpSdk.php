@@ -62,6 +62,17 @@ class SlashPhpSdk
         }
         return $this->resources['card'];
     }
+    
+       /**
+     * 获取cardGroup资源实例
+     */
+    public function cardGroup(): Resources\CardGroupResource
+    {
+        if (!isset($this->resources['cardGroup'])) {
+            $this->resources['cardGroup'] = new Resources\CardGroupResource($this->client);
+        }
+        return $this->resources['cardGroup'];
+    }
 
     /**
      * 获取底层客户端
